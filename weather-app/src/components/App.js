@@ -2,6 +2,9 @@ import React, { Component } from 'react'
 import '../css/App.css';
 import './DisplayWeather';
 import DisplayWeather from './DisplayWeather';
+import Form from 'react-bootstrap/Form';
+import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
 const axios = require('axios').default;
 
 export default class App extends Component {
@@ -10,7 +13,8 @@ export default class App extends Component {
     super(props);
     
     this.state = {
-      weather: {}
+      "weather": {},
+      "location": ""
     };
     
     this.handleCityStateFormSubmission = this.handleCityStateFormSubmission.bind(this);
@@ -21,18 +25,18 @@ export default class App extends Component {
     
     let form = document.getElementById("cityStateForm");
     let cityName = document.getElementById("city").value;
-    let state = document.getElementById("state").value;
-    let url = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "," + state + "," + "US" + "&appid=524a91657eafa89021d9d867b06ed414&units=imperial";
-    
+    let stateName = document.getElementById("state").value;
+    let url = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "," + stateName + "," + "US" + "&appid=" + process.env.REACT_APP_OPEN_WEATHER_API + "&units=imperial";
     let weatherObj;
 
-    await axios.get(url)
+    await axios.get(url)  
       .then(function (response) {
         // handle success
         console.log(response.data);
         weatherObj = {
           "weather": response.data.weather[0].description,
-          "temperature": response.data.main.temp,
+          "icon": response.data.weather[0].icon,
+          "temperature": Math.ceil(response.data.main.temp),
           "humidity": response.data.main.humidity,
           "wind": response.data.wind.speed
         };
@@ -45,24 +49,76 @@ export default class App extends Component {
         // always executed
         form.reset();
       });
+   
+    cityName = cityName.split(" ").map((word) => {
+      return word[0].toUpperCase().concat(word.slice(1));
+    }).join(" ");
+
+    stateName = stateName.toUpperCase();
 
     this.setState((state) => ({ 
-          weather: weatherObj
+          "weather": weatherObj,
+          "location": cityName + ", " + stateName + " US" 
+        }));
+  };
+
+  async componentWillMount() {
+    let cityName = "san leandro"
+    let stateName = "ca"
+    let url = "https://api.openweathermap.org/data/2.5/weather?q=" + cityName + "," + stateName + "," + "US" + "&appid=" + process.env.REACT_APP_OPEN_WEATHER_API + "&units=imperial";
+    let weatherObj;
+
+    await axios.get(url)  
+      .then(function (response) {
+        // handle success
+        console.log(response.data);
+        weatherObj = {
+          "weather": response.data.weather[0].description,
+          "icon": response.data.weather[0].icon,
+          "temperature": Math.ceil(response.data.main.temp),
+          "humidity": response.data.main.humidity,
+          "wind": response.data.wind.speed
+        };
+      })
+      .catch(function (error) {
+        // handle error
+        console.log(error);
+      })
+      .then(function () {
+        // always executed
+      });
+    
+    cityName = cityName.split(" ").map((word) => {
+      return word[0].toUpperCase().concat(word.slice(1));
+    }).join(" ");
+
+    stateName = stateName.toUpperCase();
+
+    this.setState((state) => ({ 
+          "weather": weatherObj,
+          "location": cityName + ", " + stateName + " US" 
         }));
   };
 
   render() {
     return (
       <>
-        <form id="cityStateForm" onSubmit={this.handleCityStateFormSubmission}>
-          <input type="text" id="city" name="city" placeholder="city"/>
-          <input type="text" id="state" name="state" placeholder="state"/>
-          <input type="submit" value="submit"/>
-        </form>
+        <Form id="cityStateForm" onSubmit={this.handleCityStateFormSubmission} autoComplete="off">
+          <Form.Row>
+            <Col>
+              <Form.Control type="text" id="city" name="city" placeholder="City" autoComplete="off" required/>
+            </Col>
+            <Col>
+              <Form.Control type="text" id="state" name="state" placeholder="State" autoComplete="off" required/>
+            </Col>
+              <Button id="weatherSubmitBtn" variant="outline-secondary" type="submit">Submit</Button>
+          </Form.Row>
+        </Form>
+        <span id="weatherLocation">{this.state.location}</span>
         <div id="weatherContainer">
           <DisplayWeather weatherData={this.state.weather} />
         </div>
       </>
     )
-  }
-}
+  };
+};
