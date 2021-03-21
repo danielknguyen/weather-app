@@ -1,11 +1,26 @@
 #weatherContainer {
-    height: 100vh;
     width: 100%;
     display: flex;
     justify-content: space-between;
 }
 #cityStateForm {
+    width: 400px;
+    margin: 15px auto;
     text-align: center;
+}
+#cityStateForm .form-row{
+    margin: 15px 0;
+}
+#weatherSubmitBtn {
+    margin-left: 5px;
+}
+#weatherLocation {
+    display: block;
+    font-family: 'Lato', sans-serif;
+    font-weight: 900;
+    text-align: center;
+    font-size: 24px;
+    margin-top: 15px;
 }
 /*
  * Media Queries
@@ -13,7 +28,10 @@
 
 /* Extra small devices (portrait phones, less than 576px) */
 @media (max-width: 575px) {
-  
+    #cityStateForm {
+    width: 100%;
+    padding: 0 5px;
+    }   
 }
 /* Small devices (landscape phones, less than 768px) */
 @media (max-width: 767px) {
